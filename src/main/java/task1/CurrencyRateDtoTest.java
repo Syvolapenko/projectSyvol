@@ -1,33 +1,41 @@
 package task1;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 
 public class CurrencyRateDtoTest {
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-        System.out.print("Введіть кількість знаків після коми: \t");
-        int countDigits = scanner.nextInt();
-        List<CurrencyRateDto> rates = new ArrayList<>();
-        rates.add(new CurrencyRateDto("USD", 36.5686, 37.4532));
-        rates.add(new CurrencyRateDto("EUR", 38.7426, 40.4858));
-        List<CurrencyRateDto> formattedRates = digitsAfterDecimalPoint(rates, countDigits);
-        System.out.println("\tОБМІН ВАЛЮТ");
-        System.out.println("Курс валют на сьогодні:");
-        for (CurrencyRateDto rate : formattedRates) {
-            System.out.println(rate.getCurrency() + ": " + " (купівля: " + rate.getSellRate() + ", продаж: " + rate.getBuyRate() + ")");
-        }
+
+        List<CurrencyRateDto> privat = new ArrayList<>();
+        privat.add(new CurrencyRateDto(
+                BankName.PrivatBank, Currency.USD, BigDecimal.valueOf(38.45678), BigDecimal.valueOf(37.43454)));
+        privat.add(new CurrencyRateDto(
+                BankName.PrivatBank, Currency.EUR, BigDecimal.valueOf(40.85379), BigDecimal.valueOf(39.75374)));
+        List<CurrencyRateDto> mono = new ArrayList<>();
+        mono.add(new CurrencyRateDto(
+                BankName.Mono,Currency.USD,BigDecimal.valueOf(38.42636),BigDecimal.valueOf(37.82684)));
+        mono.add(new CurrencyRateDto(
+                BankName.Mono,Currency.EUR,BigDecimal.valueOf(40.73684),BigDecimal.valueOf(39.27375)));
+        System.out.println("Not format " + privat);
+        System.out.println("Not format " + mono);
+        System.out.println("-----------------------------------------------------------");
+
+        int countDigits = 2;
+        List<CurrencyRateDto> formattedListPrivat = digitsAfterDecimalPoint(privat,countDigits);
+        List<CurrencyRateDto> formattedListMono = digitsAfterDecimalPoint(mono,countDigits);
+        System.out.println("Format " + formattedListPrivat);
+        System.out.println("Format " + formattedListMono);
     }
 
-    public static List<CurrencyRateDto> digitsAfterDecimalPoint(List<CurrencyRateDto> rates, int countDigits) {
-        List<CurrencyRateDto> formattedRates = new ArrayList<>();
-        for (CurrencyRateDto rate : rates) {
-            double roundedSellRate = Math.round(rate.getSellRate() * Math.pow(10, countDigits)) / Math.pow(10, countDigits);
-            double roundedBuyRate = Math.round(rate.getBuyRate() * Math.pow(10, countDigits)) / Math.pow(10, countDigits);
-            double[] roundedRates = {roundedSellRate, roundedBuyRate};
-            formattedRates.add(new CurrencyRateDto(rate.getCurrency(), roundedRates[0], roundedRates[1]));
+    public static List<CurrencyRateDto> digitsAfterDecimalPoint(List<CurrencyRateDto> currencyRateDtoList, int countDigits) {
+        List<CurrencyRateDto> formatted = new ArrayList<>();
+        for (CurrencyRateDto rate : currencyRateDtoList) {
+            BigDecimal roundedSellRate = rate.getSellRate().setScale(countDigits, RoundingMode.HALF_UP);
+            BigDecimal roundedBuyRate = rate.getBuyRate().setScale(countDigits,RoundingMode.HALF_UP);
+            formatted.add(new CurrencyRateDto(rate.getBankName(), rate.getCurrency(), roundedBuyRate, roundedSellRate));
         }
-        return formattedRates;
+        return formatted;
     }
 }
